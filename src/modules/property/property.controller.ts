@@ -26,10 +26,6 @@ export class PropertyController {
     return this.propertyService.findAll();
   }
 
-  /**
-   * Buscar propiedades cercanas a una ubicación
-   * GET /property/nearby?lat=50.1109&lng=8.6821&radius=10
-   */
   @Get('nearby')
   findNearby(
     @Query('lat') lat: string,
@@ -43,10 +39,6 @@ export class PropertyController {
     );
   }
 
-  /**
-   * Buscar propiedades dentro de los límites del mapa
-   * GET /property/map?north=50.2&south=50.0&east=8.7&west=8.6
-   */
   @Get('map')
   findInBounds(
     @Query('north') north: string,

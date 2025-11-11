@@ -4,7 +4,14 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Media } from '../../media/entities/media.entity';
+import { Category } from '../../taxonomy/entities/category.entity';
+import { Amenity } from '../../taxonomy/entities/amenity.entity';
+import { Tag } from '../../taxonomy/entities/tag.entity';
 
 export enum OperationType {
   SELL = 'SELL',
@@ -52,7 +59,6 @@ export class Property {
   @Column({ unique: true })
   reference_code: string;
 
-  // Clasificación
   @Column({ type: 'enum', enum: OperationType })
   operation: OperationType;
 
@@ -65,7 +71,6 @@ export class Property {
   @Column({ default: false })
   is_new: boolean;
 
-  // Dirección & Geolocalización
   @Column()
   address_line: string;
 
@@ -87,7 +92,6 @@ export class Property {
   @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
   longitude: number;
 
-  // Métricas
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   built_area_m2: number;
 
@@ -124,7 +128,6 @@ export class Property {
   @Column({ default: false })
   storage_room: boolean;
 
-  // Interior
   @Column({ nullable: true })
   kitchen_type: string;
 
@@ -146,14 +149,12 @@ export class Property {
   @Column({ type: 'int', nullable: true })
   renovation_year: number;
 
-  // Estado & Disponibilidad
   @Column({ type: 'enum', enum: PropertyStatus, default: PropertyStatus.DRAFT })
   status: PropertyStatus;
 
   @Column({ type: 'date', nullable: true })
   available_from: Date;
 
-  // Precios
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   price_amount: number;
 
@@ -161,7 +162,7 @@ export class Property {
   currency: string;
 
   @Column({ nullable: true })
-  price_frequency: string; // Para alquiler: "monthly"
+  price_frequency: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   community_fees: number;
@@ -175,7 +176,6 @@ export class Property {
   @Column({ type: 'text', nullable: true })
   commission_info: string;
 
-  // Eficiencia energética
   @Column({ type: 'enum', enum: EnergyLabel, nullable: true })
   energy_label: EnergyLabel;
 
@@ -188,7 +188,6 @@ export class Property {
   @Column({ nullable: true })
   energy_certificate_url: string;
 
-  // Amenities (booleanos principales)
   @Column({ default: false })
   balcony: boolean;
 
@@ -244,11 +243,9 @@ export class Property {
   @Column({ type: 'text', nullable: true })
   seo_description: string;
 
-  // Descripción
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  // Metadatos
   @Column({ type: 'text', nullable: true })
   notes_internal: string;
 
@@ -263,4 +260,31 @@ export class Property {
 
   @Column({ type: 'timestamp', nullable: true })
   archived_at: Date;
+
+  @OneToMany(() => Media, (media) => media.property)
+  media: Media[];
+
+  @ManyToMany(() => Category, (category) => category.properties)
+  @JoinTable({
+    name: 'property_categories',
+    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+  })
+  categories: Category[];
+
+  @ManyToMany(() => Amenity, (amenity) => amenity.properties)
+  @JoinTable({
+    name: 'property_amenities',
+    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'amenity_id', referencedColumnName: 'id' },
+  })
+  amenities: Amenity[];
+
+  @ManyToMany(() => Tag, (tag) => tag.properties)
+  @JoinTable({
+    name: 'property_tags',
+    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
+  })
+  tags: Tag[];
 }

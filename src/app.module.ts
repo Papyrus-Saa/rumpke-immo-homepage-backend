@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PropertyModule } from './modules/property/property.module';
+import { MediaModule } from './modules/media/media.module';
+import { TaxonomyModule } from './modules/taxonomy/taxonomy.module';
 
 @Module({
   imports: [
@@ -16,8 +18,8 @@ import { PropertyModule } from './modules/property/property.module';
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: configService.get('NODE_ENV') === 'development', // Auto-sync en desarrollo
-        logging: true, // Ver las queries SQL en consola
+        synchronize: configService.get('NODE_ENV') === 'development',
+        logging: true,
         ssl: {
           rejectUnauthorized: false,
         },
@@ -25,6 +27,8 @@ import { PropertyModule } from './modules/property/property.module';
       inject: [ConfigService],
     }),
     PropertyModule,
+    MediaModule,
+    TaxonomyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

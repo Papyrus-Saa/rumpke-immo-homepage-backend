@@ -13,31 +13,60 @@ export class PropertyService {
     private propertyRepository: Repository<Property>,
   ) { }
 
-  create(createPropertyDto: CreatePropertyDto) {
-    const property = this.propertyRepository.create(createPropertyDto);
-    return this.propertyRepository.save(property);
+  private transformProperty(property: Property) {
+    if (!property) return null;
+
+    const images = property.media
+      ?.filter(m => m.type === 'IMAGE')
+      .sort((a, b) => {
+        if (a.is_primary) return -1;
+        if (b.is_primary) return 1;
+        return a.position - b.position;
+      })
+      .map(m => m.url) || [];
+
+    return {
+      ...property,
+      images,
+    };
   }
 
-  findAll() {
-    return this.propertyRepository.find();
+  async create(createPropertyDto: CreatePropertyDto) {
+    const slug = createPropertyDto.title
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || `property-${Date.now()}`;
+
+    const reference_code = `REF-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+
+    const property = this.propertyRepository.create({
+      ...createPropertyDto,
+      slug,
+      reference_code,
+    });
+
+    const saved = await this.propertyRepository.save(property);
+    return this.findOne(saved.id);
   }
 
-  /**
-   * Busca propiedades cercanas a una ubicación dada
-   */
+  async findAll() {
+    const properties = await this.propertyRepository.find({
+      relations: ['media'],
+    });
+    return properties.map(p => this.transformProperty(p));
+  }
+
   async findNearby(lat: number, lng: number, radiusKm: number) {
-    // Calculamos bounds para filtrar eficientemente
     const bounds = getBoundsFromRadius(lat, lng, radiusKm);
 
-    // Buscamos propiedades dentro del rectángulo
     const properties = await this.propertyRepository.find({
       where: {
         latitude: Between(bounds.south, bounds.north),
         longitude: Between(bounds.west, bounds.east),
       },
+      relations: ['media'],
     });
 
-    // Calculamos distancia exacta y filtramos por radio
     const propertiesWithDistance = properties
       .map((property) => {
         if (!property.latitude || !property.longitude) return null;
@@ -50,35 +79,39 @@ export class PropertyService {
         );
 
         return {
-          ...property,
+          ...this.transformProperty(property),
           distance,
         };
       })
       .filter((p): p is NonNullable<typeof p> => p !== null && p.distance <= radiusKm)
-      .sort((a, b) => a.distance - b.distance); // Ordenar por distancia
+      .sort((a, b) => a.distance - b.distance);
 
     return propertiesWithDistance;
   }
 
-  /**
-   * Busca propiedades dentro de los límites del mapa
-   */
   async findInBounds(bounds: {
     north: number;
     south: number;
     east: number;
     west: number;
   }) {
-    return this.propertyRepository.find({
+    const properties = await this.propertyRepository.find({
       where: {
         latitude: Between(bounds.south, bounds.north),
         longitude: Between(bounds.west, bounds.east),
       },
+      relations: ['media'],
     });
+    return properties.map(p => this.transformProperty(p));
   }
 
-  findOne(id: string) {
-    return this.propertyRepository.findOne({ where: { id } });
+  async findOne(id: string) {
+    const property = await this.propertyRepository.findOne({
+      where: { id },
+      relations: ['media'],
+    });
+    if (!property) return null;
+    return this.transformProperty(property);
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
