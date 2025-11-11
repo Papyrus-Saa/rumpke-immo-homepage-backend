@@ -1,0 +1,438 @@
+1) Arquitectura & decisiones base
+
+ORM: Prisma (recomendado por DX, tipos fuertes) o TypeORM.
+
+DB: PostgreSQL (opcional PostGIS para mapa/geo).
+
+API: REST (y/o GraphQL si lo prefieres), versionada (/api/v1).
+
+Entornos: dev, staging, prod con .env por entorno.
+
+Estrategia de datos: “single source of truth”; inmutabilidad en históricos (precio/estado).
+
+I18n: soporte para ES/DE en campos de copy (opcional).
+
+Monorepo opcional: apps/frontend, apps/backend, packages/shared.
+
+2) Estructura Nest (filesystem sugerido)
+/src
+ ├─ main.ts
+ ├─ app.module.ts
+ ├─ config/             ← variables, esquemas zod, config service
+ ├─ common/             ← pipes, guards, interceptors, dto base, utils
+ ├─ database/           ← prisma/typeorm, migrations, seeders
+ ├─ modules/
+ │   ├─ property/       ← núcleo de viviendas
+ │   ├─ media/          ← gestión de imágenes/videos/360
+ │   ├─ search/         ← full-text, sugerencias, postgis
+ │   ├─ taxonomy/       ← tipos, categorías, etiquetas, amenities
+ │   ├─ location/       ← ciudades, barrios, geocoding
+ │   ├─ agent/          ← agentes comerciales
+ │   ├─ lead/           ← formularios: contacto, valoración, visita
+ │   ├─ pricing/        ← histórico de precios, currency, promociones
+ │   ├─ status/         ← workflow: publicada, reservada, vendida, alquilada
+ │   ├─ analytics/      ← eventos clave (visitas, leads)
+ │   ├─ seo/            ← sitemaps, feeds, schema.org
+ │   ├─ health/         ← /health, /ready, /metrics
+ │   ├─ auth/           ← (solo back-office) JWT + RBAC
+ │   └─ admin/          ← endpoints internos (CRUD seguro)
+ └─ infrastructure/     ← storage S3/R2, mail, queue, cache
+
+3) Esquema de datos (tablas principales)
+3.1 Property (vivienda)
+
+Identificación:
+
+id (UUID), slug, reference_code (visible, ej. RH-123)
+
+Clasificación:
+
+operation (enum: SELL, RENT)
+
+type (enum: APARTMENT, HOUSE, VILLA, PLOT, DUPLEX, PENTHOUSE, STUDIO, OFFICE, etc.)
+
+category (multi: LUXURY, NEW_BUILD, OPPORTUNITY, EXCLUSIVE, INVESTMENT)
+
+is_featured (destacado), is_new (nuevo)
+
+Dirección & geo:
+
+address_line, city, postal_code, region, country
+
+neighborhood_id (FK), latitude, longitude (PostGIS geometry(Point) opcional)
+
+display_address_level (mostrar exacta/parcial)
+
+Métricas:
+
+built_area_m2, usable_area_m2, plot_area_m2
+
+rooms (habitaciones), bedrooms, bathrooms
+
+floor (etage), floors_total, has_elevator
+
+parking_spaces, garage (bool), storage_room (bool)
+
+Cocina & interior:
+
+kitchen_type (abierta/cerrada/equipada), heating (gas, eléctrica), air_conditioning
+
+furnished (sí/no/parcial)
+
+orientation (N, S, E, O, combinaciones)
+
+build_year, renovation_year
+
+Estado & disponibilidad:
+
+status (enum visible: PUBLISHED, RESERVED, SOLD, RENTED, DRAFT, HIDDEN)
+
+available_from (fecha)
+
+is_price_reduced (derivado del histórico)
+
+Precios:
+
+price_amount, currency (EUR), price_frequency (mensual para alquiler)
+
+community_fees, property_tax, deposit (alquiler), commission_info
+
+Eficiencia energética:
+
+energy_label (A–G), energy_consumption_kwh_m2y, co2_emissions_kg_m2y
+
+energy_certificate_url (PDF)
+
+Amenities (muchas):
+
+balcony, terrace, garden, pool, fireplace, pets_allowed,
+
+sea_view, mountain_view, city_view,
+
+double_glazing, smart_home, solar_panels, floor_heating,
+
+security_door, cctv, concierge, etc. (modelarlo como tabla de amenidades + tabla puente)
+
+Multimedia:
+
+relación con Media (galería, plano, vídeo, 360, documentos)
+
+hero_media_id (destacada)
+
+Relaciones:
+
+agent_id (agente comercial)
+
+owner_id (propietario – si lo manejas), no exponer datos sensibles
+
+SEO:
+
+seo_title, seo_description, og_image (puede salir de Media)
+
+Metadatos:
+
+tags (tabla aparte), notes_internal (privado)
+
+created_at, updated_at, published_at, archived_at
+
+3.2 PriceHistory (histórico de precios)
+
+property_id, price_amount, currency, valid_from, reason (INITIAL, REDUCTION, INCREASE)
+
+Derivados: calcular is_price_reduced comparando último vs anterior.
+
+3.3 StatusHistory
+
+property_id, status (PUBLISHED, RESERVED, SOLD, RENTED, HIDDEN, DRAFT)
+
+changed_at, changed_by (usuario interno)
+
+3.4 Media
+
+id, property_id, type (IMAGE, VIDEO, FLOORPLAN, TOUR_360, DOC), url, alt, position, is_primary
+
+width, height, size_bytes, checksum (opcional)
+
+Origen: S3/R2/Cloudinary (guardar metadatos).
+
+3.5 Taxonomy
+
+PropertyType (si no usas enum)
+
+Category (LUXURY, NEW_BUILD…)
+
+Amenity (catálogo) + PropertyAmenity (tabla puente)
+
+Tag + PropertyTag (tabla puente)
+
+3.6 Location
+
+City, Neighborhood (para filtros y SEO “por zona”)
+
+GeoBoundary (polígonos opcionales)
+
+3.7 Agent
+
+id, name, email, phone, photo_url, bio_short, languages
+
+is_public (si lo muestras en el detalle)
+
+3.8 Lead (formularios)
+
+type (CONTACT, VALUATION, VISIT_REQUEST)
+
+property_id (nullable para contacto general)
+
+name, email, phone, message, consent, created_at, source (web, campaña)
+
+status (NEW, IN_PROGRESS, DONE)
+
+4) Filtros & búsqueda (API pública)
+
+Query de listado /properties:
+
+operation (kaufen/mieten)
+
+type (apartment, house…)
+
+city, neighborhood, postal_code
+
+min_price, max_price, min_area, max_area
+
+bedrooms, bathrooms
+
+status (published, reserved… — por defecto solo PUBLISHED)
+
+amenities[] (multi)
+
+energy_label[]
+
+new_build, luxury, featured, price_reduced
+
+sort (newest, price_asc, price_desc, area_asc/desc)
+
+page, limit
+
+Sugerencias /search/suggest?q=Nord…:
+
+ciudades, barrios, referencias, tipos
+
+Mapa /properties/near?lat=..&lng=..&radius=.. (si implementas PostGIS)
+
+Detalle /properties/:slug-or-id
+
+Relacionadas /properties/:id/related
+
+Índices recomendados:
+
+operation, type, status, city, postal_code
+
+price_amount, built_area_m2, bedrooms, bathrooms
+
+GIN para tags, amenities
+
+text/trigram para title, address
+
+GIST (PostGIS) para geo
+
+5) Workflow y estados de una vivienda
+
+Draft → Published → Reserved → Sold/Rented → Hidden/Archived
+
+Acciones internas (admin):
+
+Crear/editar vivienda
+
+Cambiar operation (venta ⇄ alquiler)
+
+Marcar reservada, vendida o alquilada
+
+Registrar cambio de precio (crea entrada en PriceHistory)
+
+Etiquetar price_reduced (derivado)
+
+Añadir/ordenar media y planos
+
+Añadir amenities, tags, categorías
+
+6) SEO & feeds desde backend
+
+Sitemaps:
+
+/sitemap.xml (índice)
+
+/sitemap-properties.xml, /sitemap-blog.xml
+
+Schema.org JSON-LD:
+
+RealEstateAgent (organización)
+
+Offer + Product/Place para propiedades
+
+Feeds (opcional): XML/JSON para portales o integraciones.
+
+7) Media & almacenamiento
+
+Subida de imágenes a S3/R2/Cloudinary.
+
+Variantes (thumb, web, retina) generadas offline o por CDN.
+
+Validaciones: tamaño, formato, ratio.
+
+Metadatos alt (SEO/accesibilidad).
+
+Planos y documentos (PDF) con tipo FLOORPLAN/DOC.
+
+8) Seguridad & calidad
+
+Rate limiting (contacto, valoración, sugerencias).
+
+Validation con DTOs (class-validator/zod).
+
+Sanitización (XSS, HTML).
+
+CORS controlado.
+
+Helmet/headers seguros si lo expones directo.
+
+Auth (solo back-office): JWT + roles (ADMIN, EDITOR).
+
+Auditoría: quién cambió estado/precio.
+
+9) Observabilidad & DX
+
+Health checks /health, /ready.
+
+Metrics (Prometheus) y logs estructurados (p. ej. Pino).
+
+Tracing (OpenTelemetry) opcional.
+
+Seeders y migrations claras.
+
+Fixtures para demos y staging.
+
+10) Internacionalización & moneda
+
+Definir currency (EUR) pero permitir conversión futura.
+
+Copys traducibles (descripciones breves por idioma si aplica).
+
+Localización de números/fechas en respuestas.
+
+11) Pasos de implementación (roadmap)
+
+Config & bootstrap
+
+Proyecto Nest, módulos base config, database, health.
+
+ORM configurado, DATABASE_URL en Railway (dev/stage/prod).
+
+Modelo de datos
+
+Entidades: Property, Media, PriceHistory, StatusHistory, Amenity, Category, Tag, Agent, Lead, Location.
+
+Migraciones iniciales.
+
+Property module
+
+DTOs & validación.
+
+Listar (con filtros, orden, paginación) + detalle + relacionadas.
+
+Solo PUBLISHED en pública.
+
+Search module
+
+Sugerencias (/search/suggest) y full-text.
+
+PostGIS “nearby” (si activas).
+
+Media module
+
+Registrar media (metadatos), asignar hero.
+
+Pricing & Status
+
+Endpoints internos para cambios de precio (crea histórico) y workflow de estados.
+
+Derivados: is_price_reduced.
+
+Lead module
+
+Formularios: POST /leads/contact, POST /leads/valuation, POST /leads/visit.
+
+Rate limit + email de notificación (infra/mail).
+
+SEO module
+
+Sitemaps y schema.org embebible.
+
+Admin module + Auth (si necesitas back-office ya)
+
+CRUD seguro, roles, auditoría.
+
+Optimización
+
+Índices, cache selectiva (listados calientes), compresión/respuesta.
+
+Analytics
+
+Endpoint para eventos (clic CTA, envío lead) si lo centralizas en el back.
+
+Hardening & deploy
+
+Health, readiness, logs, backups DB, rotación de secrets.
+
+12) “Todo lo que una vivienda debe ofrecer” (checklist de campos)
+
+Identificación: id, slug, referencia pública.
+
+Operación: venta / alquiler (+ frecuencia precio para alquiler).
+
+Tipo: apartamento, casa, villa, ático, dúplex, estudio, parcela…
+
+Categorías: lujo, obra nueva, exclusiva, oportunidad, inversión…
+
+Ubicación: dirección, ciudad, CP, barrio, región, país, lat/lng (geom).
+
+Dimensiones: construidos, útiles, parcela, terrazas/balcones.
+
+Distribución: dormitorios, baños, planta, total plantas, ascensor.
+
+Interior: cocina (abierta/cerrada/equipada), calefacción, A/A, amueblado.
+
+Exterior: jardín, piscina, vistas (mar, montaña, ciudad), orientación.
+
+Aparcamiento: plazas, garaje, trastero.
+
+Año: construcción y reforma.
+
+Estado: publicada, reservada, vendida, alquilada, borrador, oculta; disponibilidad.
+
+Precio: importe, moneda, (alquiler: mensual), depósito, comunidad, IBI, comisión/info honorarios.
+
+Energía: etiqueta (A–G), consumo, CO2, certificado (URL).
+
+Amenities: lista (balcón, terraza, domótica, paneles solares, suelo radiante, mascotas…).
+
+Multimedia: hero, galería, vídeo, tour 360, planos, documentos.
+
+SEO: título, descripción, og image.
+
+Relaciones: agente, propietario (privado), barrio/ciudad.
+
+Históricos: precios, estados.
+
+Metadatos: tags, notas internas, fechas (creación/publicación).
+
+13) Integraciones & extras (opcionales)
+
+Geocoding (dirección → lat/lng).
+
+Email (notificación de lead) y webhooks (CRM).
+
+Queues (BullMQ) para procesar imágenes, sitemaps, emails.
+
+Cache (Redis) para listados populares.
+
+Exports (CSV/JSON) para portales.
