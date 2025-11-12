@@ -11,6 +11,7 @@ import {
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
+import { SearchPropertyDto } from './dto/search-property.dto';
 
 @Controller('property')
 export class PropertyController {
@@ -24,6 +25,11 @@ export class PropertyController {
   @Get()
   findAll() {
     return this.propertyService.findAll();
+  }
+
+  @Get('search')
+  search(@Query() searchDto: SearchPropertyDto) {
+    return this.propertyService.search(searchDto);
   }
 
   @Get('nearby')

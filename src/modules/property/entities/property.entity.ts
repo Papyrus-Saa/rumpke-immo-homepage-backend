@@ -6,12 +6,18 @@ import {
   UpdateDateColumn,
   OneToMany,
   ManyToMany,
+  ManyToOne,
   JoinTable,
+  JoinColumn,
+
 } from 'typeorm';
 import { Media } from '../../media/entities/media.entity';
 import { Category } from '../../taxonomy/entities/category.entity';
 import { Amenity } from '../../taxonomy/entities/amenity.entity';
 import { Tag } from '../../taxonomy/entities/tag.entity';
+import { Agent } from '../../agent/entities/agent.entity';
+import { PriceHistory } from '../../price-history/entities/price-history.entity';
+import { StatusHistory } from '../../status-history/entities/status-history.entity';
 
 export enum OperationType {
   SELL = 'SELL',
@@ -264,6 +270,12 @@ export class Property {
   @OneToMany(() => Media, (media) => media.property)
   media: Media[];
 
+  @OneToMany(() => PriceHistory, (priceHistory) => priceHistory.property)
+  priceHistory: PriceHistory[];
+
+  @OneToMany(() => StatusHistory, (statusHistory) => statusHistory.property)
+  statusHistory: StatusHistory[];
+
   @ManyToMany(() => Category, (category) => category.properties)
   @JoinTable({
     name: 'property_categories',
@@ -287,4 +299,13 @@ export class Property {
     inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags: Tag[];
+
+  @Column({ type: 'uuid', nullable: true })
+  agent_id: string;
+
+  @ManyToOne(() => Agent, (agent) => agent.properties, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'agent_id' })
+  agent: Agent;
 }

@@ -6,6 +6,10 @@ import { AppService } from './app.service';
 import { PropertyModule } from './modules/property/property.module';
 import { MediaModule } from './modules/media/media.module';
 import { TaxonomyModule } from './modules/taxonomy/taxonomy.module';
+import { AgentModule } from './modules/agent/agent.module';
+import { LeadModule } from './modules/lead/lead.module';
+import { PriceHistoryModule } from './modules/price-history/price-history.module';
+import { StatusHistoryModule } from './modules/status-history/status-history.module';
 
 @Module({
   imports: [
@@ -29,6 +33,10 @@ import { TaxonomyModule } from './modules/taxonomy/taxonomy.module';
     PropertyModule,
     MediaModule,
     TaxonomyModule,
+    AgentModule,
+    LeadModule,
+    PriceHistoryModule,
+    StatusHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
