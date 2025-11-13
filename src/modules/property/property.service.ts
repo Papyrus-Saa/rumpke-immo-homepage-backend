@@ -5,12 +5,14 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { Property } from './entities/property.entity';
 import { calculateDistance, getBoundsFromRadius } from '../../common/utils/geo.utils';
+import { GeocodingService } from '../../common/services/geocoding.service';
 
 @Injectable()
 export class PropertyService {
   constructor(
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
+    private geocodingService: GeocodingService,
   ) { }
 
   private transformProperty(property: Property) {
@@ -39,10 +41,32 @@ export class PropertyService {
 
     const reference_code = `REF-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
 
+    let latitude = createPropertyDto.latitude;
+    let longitude = createPropertyDto.longitude;
+
+    if (!latitude || !longitude) {
+      const address = this.geocodingService.buildAddress(
+        createPropertyDto.address_line,
+        createPropertyDto.city,
+        createPropertyDto.postal_code,
+        createPropertyDto.country,
+      );
+
+      if (address) {
+        const result = await this.geocodingService.geocode(address);
+        if (result) {
+          latitude = result.latitude;
+          longitude = result.longitude;
+        }
+      }
+    }
+
     const property = this.propertyRepository.create({
       ...createPropertyDto,
       slug,
       reference_code,
+      latitude,
+      longitude,
     });
 
     const saved = await this.propertyRepository.save(property);
