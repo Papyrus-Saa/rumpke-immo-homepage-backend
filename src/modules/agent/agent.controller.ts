@@ -21,6 +21,7 @@ export class AgentController {
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createAgentDto: CreateAgentDto) {
+    console.log('BODY RECIBIDO:', JSON.stringify(createAgentDto));
     return this.agentService.create(createAgentDto);
   }
 

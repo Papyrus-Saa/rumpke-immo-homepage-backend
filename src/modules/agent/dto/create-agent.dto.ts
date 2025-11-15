@@ -6,7 +6,7 @@ import {
   IsUrl,
   IsArray,
   MaxLength,
-  MinLength,
+  ArrayNotEmpty,
 } from 'class-validator';
 
 export class CreateAgentDto {
@@ -49,19 +49,22 @@ export class CreateAgentDto {
   @MaxLength(1000, { message: 'Biografie (ES) ist zu lang' })
   bio_es?: string;
 
-  @IsOptional()
-  @IsString({ message: 'Biografie (PL) muss Text sein' })
-  @MaxLength(1000, { message: 'Biografie (PL) ist zu lang' })
-  bio_pl?: string;
 
-  @IsOptional()
-  @IsString({ message: 'Biografie (NL) muss Text sein' })
-  @MaxLength(1000, { message: 'Biografie (NL) ist zu lang' })
-  bio_nl?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_pl?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_nl?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_pt?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_fr?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_it?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_ru?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_ar?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_zh?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_ja?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_tr?: string;
+  @IsOptional() @IsString() @MaxLength(1000) bio_hi?: string;
 
   @IsArray({ message: 'Sprachen müssen ein Array sein' })
+  @ArrayNotEmpty({ message: 'Mindestens eine Sprache erforderlich' })
   @IsString({ each: true, message: 'Jede Sprache muss Text sein' })
-  @MinLength(1, { message: 'Mindestens eine Sprache erforderlich' })
   languages: string[];
 
   @IsOptional()
@@ -87,13 +90,15 @@ export class CreateAgentDto {
   @MaxLength(100, { message: 'Position (ES) ist zu lang' })
   position_es?: string;
 
-  @IsOptional()
-  @IsString({ message: 'Position (PL) muss Text sein' })
-  @MaxLength(100, { message: 'Position (PL) ist zu lang' })
-  position_pl?: string;
-
-  @IsOptional()
-  @IsString({ message: 'Position (NL) muss Text sein' })
-  @MaxLength(100, { message: 'Position (NL) ist zu lang' })
-  position_nl?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_pl?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_nl?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_pt?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_fr?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_it?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_ru?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_ar?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_zh?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_ja?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_tr?: string;
+  @IsOptional() @IsString() @MaxLength(100) position_hi?: string;
 }

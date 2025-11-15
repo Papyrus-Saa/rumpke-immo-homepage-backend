@@ -16,7 +16,11 @@ import {
 import { Type } from 'class-transformer';
 import { OperationType, PropertyType, PropertyStatus, EnergyLabel } from '../entities/property.entity';
 
+
+
 export class CreatePropertyDto {
+  @IsString({ message: 'AgentId muss Text sein' })
+  agent: string;
   @IsEnum(OperationType, { message: 'Vorgang muss SELL oder RENT sein' })
   operation: OperationType;
 
