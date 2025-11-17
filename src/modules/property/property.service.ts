@@ -61,16 +61,18 @@ export class PropertyService {
       }
     }
 
-    const property = this.propertyRepository.create({
-      ...createPropertyDto,
-      slug,
-      reference_code,
-      latitude,
-      longitude,
-    });
+
+    let createData: any = { ...createPropertyDto, slug, reference_code, latitude, longitude };
+    if (typeof createPropertyDto.agent === 'string' && createPropertyDto.agent.trim().length > 0) {
+      createData.agent = { id: createPropertyDto.agent };
+    } else {
+      delete createData.agent;
+    }
+    const property = this.propertyRepository.create(createData);
 
     const saved = await this.propertyRepository.save(property);
-    return this.findOne(saved.id);
+    const savedProperty = Array.isArray(saved) ? saved[0] : saved;
+    return this.findOne(savedProperty.id);
   }
 
   async findAll() {
@@ -139,7 +141,14 @@ export class PropertyService {
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
-    await this.propertyRepository.update(id, updatePropertyDto);
+    let updateData: any = { ...updatePropertyDto };
+    if (typeof updatePropertyDto.agent === 'string') {
+      updateData.agent = { id: updatePropertyDto.agent };
+    } else if (updatePropertyDto.agent === undefined) {
+
+      delete updateData.agent;
+    }
+    await this.propertyRepository.update(id, updateData);
     return this.findOne(id);
   }
 

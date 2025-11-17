@@ -28,10 +28,11 @@ export class AgentService {
       where.is_active = true;
     }
 
-    return this.agentRepository.find({
+    const agents = await this.agentRepository.find({
       where,
       order: { last_name: 'ASC', first_name: 'ASC' },
     });
+    return agents;
   }
 
   async findOne(id: string): Promise<Agent> {

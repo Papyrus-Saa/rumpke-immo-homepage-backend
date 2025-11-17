@@ -16,6 +16,7 @@ import { UpdateAgentDto } from './dto/update-agent.dto';
 
 @Controller('agent')
 export class AgentController {
+
   constructor(private readonly agentService: AgentService) { }
 
   @UseGuards(JwtAuthGuard)
