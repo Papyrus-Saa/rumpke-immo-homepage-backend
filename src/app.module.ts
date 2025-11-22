@@ -16,6 +16,7 @@ import { StatusHistoryModule } from './modules/status-history/status-history.mod
 import { SitemapModule } from './modules/sitemap/sitemap.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { HealthModule } from './modules/health/health.module';
     SitemapModule,
     AuthModule,
     HealthModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

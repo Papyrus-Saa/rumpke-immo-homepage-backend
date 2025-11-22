@@ -17,6 +17,7 @@ import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadStatus, LeadType } from './entities/lead.entity';
 
+@UseGuards(JwtAuthGuard)
 @Controller('lead')
 export class LeadController {
   constructor(private readonly leadService: LeadService) { }

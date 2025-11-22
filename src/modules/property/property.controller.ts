@@ -15,6 +15,7 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 import { SearchPropertyDto } from './dto/search-property.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) { }
