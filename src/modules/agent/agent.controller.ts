@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -8,6 +9,7 @@ import {
   Delete,
   Query,
   UseGuards,
+
 } from '@nestjs/common';
 import { AgentService } from './agent.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,9 +24,33 @@ export class AgentController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createAgentDto: CreateAgentDto) {
-    console.log('BODY RECIBIDO:', JSON.stringify(createAgentDto));
-    return this.agentService.create(createAgentDto);
+  async create(@Body() createAgentDto: CreateAgentDto) {
+    try {
+      return await this.agentService.create(createAgentDto);
+    } catch (error: any) {
+
+      if (error.code === '23505' && error.detail?.includes('email')) {
+        throw new BadRequestException({
+          errors: [
+            { field: 'email', message: 'Diese E-Mail ist bereits registriert.' }
+          ]
+        });
+      }
+
+      if (error instanceof BadRequestException) {
+        const response = typeof error.getResponse === 'function' ? error.getResponse() : {};
+        const errors =
+          typeof response === 'object' && response !== null && 'errors' in response
+            ? (response as any).errors
+            : [{ field: 'unknown', message: error.message }];
+        return {
+          statusCode: 400,
+          errors,
+        };
+      }
+
+      throw error;
+    }
   }
 
   @Get()

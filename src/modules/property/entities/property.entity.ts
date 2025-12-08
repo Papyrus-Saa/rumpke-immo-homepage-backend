@@ -59,6 +59,12 @@ export class Property {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  owner: string;
+
+  @Column({ type: 'enum', enum: ['haus', 'wohnung', 'gewerbe', 'grundstueck', 'sonstige'], default: 'sonstige' })
+  category: 'haus' | 'wohnung' | 'gewerbe' | 'grundstueck' | 'sonstige';
+
   @Column({ unique: true })
   slug: string;
 

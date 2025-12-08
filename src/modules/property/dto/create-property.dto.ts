@@ -21,19 +21,27 @@ import { OperationType, PropertyType, PropertyStatus, EnergyLabel } from '../ent
 export class CreatePropertyDto {
   @IsString({ message: 'AgentId muss Text sein' })
   agent: string;
-  @IsEnum(OperationType, { message: 'Vorgang muss SELL oder RENT sein' })
+
+  @IsString({ message: 'Eigentümer muss Text sein' })
+  owner: string;
+  @IsEnum(OperationType, { message: 'Vermarktungsart muss SELL oder RENT sein' })
   operation: OperationType;
 
   @IsEnum(PropertyType, { message: 'Ungültiger Immobilientyp' })
   type: PropertyType;
 
+
+  @IsEnum(['haus', 'wohnung', 'gewerbe', 'grundstueck', 'sonstige'], { message: 'Ungültige Kategorie' })
+  category: 'haus' | 'wohnung' | 'gewerbe' | 'grundstueck' | 'sonstige';
+
   @IsOptional()
   @IsEnum(PropertyStatus, { message: 'Ungültiger Immobilienstatus' })
   status?: PropertyStatus;
 
+  @IsOptional()
   @IsString({ message: 'Adresse muss Text sein' })
   @MaxLength(255, { message: 'Adresse ist zu lang' })
-  address_line: string;
+  address_line?: string;
 
   @IsString({ message: 'Stadt muss Text sein' })
   @MaxLength(100, { message: 'Stadt ist zu lang' })
@@ -43,9 +51,6 @@ export class CreatePropertyDto {
   @MaxLength(20, { message: 'Postleitzahl ist zu lang' })
   postal_code: string;
 
-  @IsString({ message: 'Region muss Text sein' })
-  @MaxLength(100, { message: 'Region ist zu lang' })
-  region: string;
 
   @IsOptional()
   @IsString({ message: 'Land muss Text sein' })
@@ -100,8 +105,8 @@ export class CreatePropertyDto {
   has_elevator?: boolean;
 
   @IsOptional()
-  @IsNumber({}, { message: 'Anzahl der Parkplätze muss eine Zahl sein' })
-  @Min(0, { message: 'Parkplätze können nicht negativ sein' })
+  @IsNumber({}, { message: 'Anzahl der Stellplätze muss eine Zahl sein' })
+  @Min(0, { message: 'Stellplätze können nicht negativ sein' })
   parking_spaces?: number;
 
   @IsOptional()
@@ -118,8 +123,8 @@ export class CreatePropertyDto {
   kitchen_type?: string;
 
   @IsOptional()
-  @IsString({ message: 'Heizungstyp muss Text sein' })
-  @MaxLength(50, { message: 'Heizungstyp ist zu lang' })
+  @IsString({ message: 'Heizungsart muss Text sein' })
+  @MaxLength(50, { message: 'Heizungsart ist zu lang' })
   heating?: string;
 
   @IsOptional()
@@ -131,10 +136,6 @@ export class CreatePropertyDto {
   @MaxLength(50, { message: 'Möblierung ist zu lang' })
   furnished?: string;
 
-  @IsOptional()
-  @IsString({ message: 'Ausrichtung muss Text sein' })
-  @MaxLength(50, { message: 'Ausrichtung ist zu lang' })
-  orientation?: string;
 
   @IsOptional()
   @IsNumber({}, { message: 'Baujahr muss eine Zahl sein' })
@@ -143,9 +144,9 @@ export class CreatePropertyDto {
   build_year?: number;
 
   @IsOptional()
-  @IsNumber({}, { message: 'Renovierungsjahr muss eine Zahl sein' })
-  @Min(1800, { message: 'Renovierungsjahr ist zu alt' })
-  @Max(new Date().getFullYear() + 2, { message: 'Renovierungsjahr kann nicht in der Zukunft liegen' })
+  @IsNumber({}, { message: 'Zustand muss eine Zahl sein' })
+  @Min(1800, { message: 'Zustand ist zu alt' })
+  @Max(new Date().getFullYear() + 2, { message: 'Zustand kann nicht in der Zukunft liegen' })
   renovation_year?: number;
 
   @IsOptional()
@@ -162,20 +163,12 @@ export class CreatePropertyDto {
   @Length(3, 3, { message: 'Währung muss ein 3-Buchstaben-Code sein (z.B. EUR)' })
   currency?: string;
 
-  @IsOptional()
-  @IsString({ message: 'Preisfrequenz muss Text sein' })
-  @MaxLength(20, { message: 'Preisfrequenz ist zu lang' })
-  price_frequency?: string;
 
   @IsOptional()
   @IsNumber({}, { message: 'Nebenkosten müssen eine Zahl sein' })
   @Min(0, { message: 'Nebenkosten können nicht negativ sein' })
   community_fees?: number;
 
-  @IsOptional()
-  @IsNumber({}, { message: 'Grundsteuer muss eine Zahl sein' })
-  @Min(0, { message: 'Grundsteuer kann nicht negativ sein' })
-  property_tax?: number;
 
   @IsOptional()
   @IsNumber({}, { message: 'Kaution muss eine Zahl sein' })
@@ -196,14 +189,6 @@ export class CreatePropertyDto {
   @Min(0, { message: 'Energieverbrauch kann nicht negativ sein' })
   energy_consumption_kwh_m2y?: number;
 
-  @IsOptional()
-  @IsNumber({}, { message: 'CO2-Emissionen müssen eine Zahl sein' })
-  @Min(0, { message: 'CO2-Emissionen können nicht negativ sein' })
-  co2_emissions_kg_m2y?: number;
-
-  @IsOptional()
-  @IsUrl({}, { message: 'Energieausweis-URL muss gültig sein' })
-  energy_certificate_url?: string;
 
   @IsOptional()
   @IsBoolean({ message: 'Balkon muss true oder false sein' })
@@ -225,9 +210,6 @@ export class CreatePropertyDto {
   @IsBoolean({ message: 'Kamin muss true oder false sein' })
   fireplace?: boolean;
 
-  @IsOptional()
-  @IsBoolean({ message: 'Haustiere erlaubt muss true oder false sein' })
-  pets_allowed?: boolean;
 
   @IsOptional()
   @IsBoolean({ message: 'Meerblick muss true oder false sein' })
@@ -241,13 +223,6 @@ export class CreatePropertyDto {
   @IsBoolean({ message: 'Stadtblick muss true oder false sein' })
   city_view?: boolean;
 
-  @IsOptional()
-  @IsBoolean({ message: 'Doppelverglasung muss true oder false sein' })
-  double_glazing?: boolean;
-
-  @IsOptional()
-  @IsBoolean({ message: 'Smart Home muss true oder false sein' })
-  smart_home?: boolean;
 
   @IsOptional()
   @IsBoolean({ message: 'Solarpanels muss true oder false sein' })
@@ -257,13 +232,7 @@ export class CreatePropertyDto {
   @IsBoolean({ message: 'Fußbodenheizung muss true oder false sein' })
   floor_heating?: boolean;
 
-  @IsOptional()
-  @IsBoolean({ message: 'Sicherheitstür muss true oder false sein' })
-  security_door?: boolean;
 
-  @IsOptional()
-  @IsBoolean({ message: 'Videoüberwachung muss true oder false sein' })
-  cctv?: boolean;
 
   @IsOptional()
   @IsBoolean({ message: 'Hausmeister muss true oder false sein' })
@@ -282,11 +251,9 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString({ message: 'Titel muss Text sein' })
   @MaxLength(200, { message: 'Titel ist zu lang' })
-  title?: string;
+  @IsString({ message: 'Titel muss Text sein' })
+  title: string;
 
-  @IsOptional()
-  @IsBoolean({ message: 'Hervorgehoben muss true oder false sein' })
-  is_featured?: boolean;
 
   @IsOptional()
   @IsBoolean({ message: 'Neu muss true oder false sein' })

@@ -63,6 +63,9 @@ export class PropertyService {
 
 
     let createData: any = { ...createPropertyDto, slug, reference_code, latitude, longitude };
+    if (!createPropertyDto.category) {
+      createData.category = 'sonstige';
+    }
     if (typeof createPropertyDto.agent === 'string' && createPropertyDto.agent.trim().length > 0) {
       createData.agent = { id: createPropertyDto.agent };
     } else {
@@ -142,6 +145,10 @@ export class PropertyService {
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
     let updateData: any = { ...updatePropertyDto };
+    // Asegurar que la categoría se actualice correctamente
+    if (!updatePropertyDto.category) {
+      updateData.category = 'sonstige';
+    }
     if (typeof updatePropertyDto.agent === 'string') {
       updateData.agent = { id: updatePropertyDto.agent };
     } else if (updatePropertyDto.agent === undefined) {
