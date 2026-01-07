@@ -145,7 +145,6 @@ export class PropertyService {
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
     let updateData: any = { ...updatePropertyDto };
-    // Asegurar que la categoría se actualice correctamente
     if (!updatePropertyDto.category) {
       updateData.category = 'sonstige';
     }

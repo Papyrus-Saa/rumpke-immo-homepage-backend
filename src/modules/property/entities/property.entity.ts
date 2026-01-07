@@ -25,14 +25,11 @@ export enum OperationType {
 }
 
 export enum PropertyType {
-  APARTMENT = 'APARTMENT',
-  HOUSE = 'HOUSE',
-  VILLA = 'VILLA',
-  PLOT = 'PLOT',
-  DUPLEX = 'DUPLEX',
-  PENTHOUSE = 'PENTHOUSE',
-  STUDIO = 'STUDIO',
-  OFFICE = 'OFFICE',
+  HAUS = 'haus',
+  WOHNUNG = 'wohnung',
+  GEWERBE = 'gewerbe',
+  GRUNDSTUECK = 'grundstueck',
+  SONSTIGE = 'sonstige',
 }
 
 export enum PropertyStatus {
@@ -92,8 +89,6 @@ export class Property {
   @Column()
   postal_code: string;
 
-  @Column()
-  region: string;
 
   @Column({ default: 'Germany' })
   country: string;

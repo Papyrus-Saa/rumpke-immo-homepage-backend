@@ -34,14 +34,12 @@ export class CreatePropertyDto {
   @IsEnum(['haus', 'wohnung', 'gewerbe', 'grundstueck', 'sonstige'], { message: 'Ungültige Kategorie' })
   category: 'haus' | 'wohnung' | 'gewerbe' | 'grundstueck' | 'sonstige';
 
-  @IsOptional()
   @IsEnum(PropertyStatus, { message: 'Ungültiger Immobilienstatus' })
-  status?: PropertyStatus;
+  status: PropertyStatus;
 
-  @IsOptional()
   @IsString({ message: 'Adresse muss Text sein' })
   @MaxLength(255, { message: 'Adresse ist zu lang' })
-  address_line?: string;
+  address_line: string;
 
   @IsString({ message: 'Stadt muss Text sein' })
   @MaxLength(100, { message: 'Stadt ist zu lang' })
@@ -158,10 +156,11 @@ export class CreatePropertyDto {
   @Min(0, { message: 'Preis kann nicht negativ sein' })
   price_amount: number;
 
-  @IsOptional()
   @IsString({ message: 'Währung muss Text sein' })
   @Length(3, 3, { message: 'Währung muss ein 3-Buchstaben-Code sein (z.B. EUR)' })
-  currency?: string;
+  currency: string;
+  @IsString({ message: 'Hauptbild muss Text sein' })
+  main_image: string;
 
 
   @IsOptional()
