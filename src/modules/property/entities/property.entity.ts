@@ -247,6 +247,9 @@ export class Property {
   @Column({ nullable: false })
   title: string;
 
+  @Column({ nullable: false })
+  main_image: string; // URL de la imagen principal
+
   @Column({ type: 'text', nullable: true })
   seo_description: string;
 
