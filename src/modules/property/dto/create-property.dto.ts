@@ -247,10 +247,8 @@ export class CreatePropertyDto {
   @MaxLength(2000, { message: 'Interne Notizen sind zu lang' })
   notes_internal?: string;
 
-  @IsOptional()
   @IsString({ message: 'Titel muss Text sein' })
   @MaxLength(200, { message: 'Titel ist zu lang' })
-  @IsString({ message: 'Titel muss Text sein' })
   title: string;
 
 

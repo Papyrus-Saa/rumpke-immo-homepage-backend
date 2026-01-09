@@ -244,7 +244,7 @@ export class Property {
   concierge: boolean;
 
   // SEO
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   title: string;
 
   @Column({ type: 'text', nullable: true })
