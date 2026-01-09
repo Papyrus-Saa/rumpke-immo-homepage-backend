@@ -56,10 +56,12 @@ export class CreatePropertyDto {
   country?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsLatitude({ message: 'Ungültiger Breitengrad' })
   latitude?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsLongitude({ message: 'Ungültiger Längengrad' })
   longitude?: number;
 
