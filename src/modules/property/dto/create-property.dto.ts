@@ -162,6 +162,7 @@ export class CreatePropertyDto {
   @Length(3, 3, { message: 'Währung muss ein 3-Buchstaben-Code sein (z.B. EUR)' })
   currency: string;
   @IsString({ message: 'Hauptbild muss Text sein' })
+  @IsUrl({}, { message: 'main_image debe ser una URL válida' })
   main_image: string;
 
 
