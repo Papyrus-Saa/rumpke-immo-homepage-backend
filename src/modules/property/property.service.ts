@@ -29,6 +29,7 @@ export class PropertyService {
 
     return {
       ...property,
+      title: property.title,
       images,
     };
   }
