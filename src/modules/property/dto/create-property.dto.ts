@@ -249,6 +249,7 @@ export class CreatePropertyDto {
 
   @IsString({ message: 'Titel muss Text sein' })
   @MaxLength(200, { message: 'Titel ist zu lang' })
+  @Length(1, 200, { message: 'Titel darf nicht leer sein' })
   title: string;
 
 
