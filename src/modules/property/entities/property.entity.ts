@@ -245,7 +245,7 @@ export class Property {
 
   // SEO
   @Column({ nullable: true })
-  seo_title: string;
+  title: string;
 
   @Column({ type: 'text', nullable: true })
   seo_description: string;
