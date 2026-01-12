@@ -146,7 +146,8 @@ export class PropertyService {
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
     let updateData: any = { ...updatePropertyDto };
-    console.log('PATCH property', { id, updatePropertyDto });
+    console.log('PATCH property - datos recibidos desde frontend:', updatePropertyDto);
+    console.log('PATCH property - id:', id);
 
     // Obtener la propiedad actual para comparar el título
     const current = await this.propertyRepository.findOne({ where: { id } });
