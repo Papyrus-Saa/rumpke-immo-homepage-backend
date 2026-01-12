@@ -146,16 +146,17 @@ export class PropertyService {
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
     let updateData: any = { ...updatePropertyDto };
+    console.log('PATCH property', { id, updatePropertyDto });
     if (!updatePropertyDto.category) {
       updateData.category = 'sonstige';
     }
     if (typeof updatePropertyDto.agent === 'string') {
       updateData.agent = { id: updatePropertyDto.agent };
     } else if (updatePropertyDto.agent === undefined) {
-
       delete updateData.agent;
     }
-    await this.propertyRepository.update(id, updateData);
+    const result = await this.propertyRepository.update(id, updateData);
+    console.log('Update result:', result);
     return this.findOne(id);
   }
 
