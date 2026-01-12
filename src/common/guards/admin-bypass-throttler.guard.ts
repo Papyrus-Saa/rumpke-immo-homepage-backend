@@ -6,8 +6,9 @@ export class AdminBypassThrottlerGuard extends ThrottlerGuard {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
 
-    if (req.user && req.user.role === 'admin') {
 
+    if (req.user && req.user.role && req.user.role.toLowerCase() === 'admin') {
+      // Permitir sin límite para admin (insensible a mayúsculas)
       return true;
     }
 
