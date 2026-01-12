@@ -4,8 +4,9 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 @Injectable()
 export class AdminBypassThrottlerGuard extends ThrottlerGuard {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest();
 
+    const req = context.switchToHttp().getRequest();
+    console.log('ThrottlerGuard req.user:', req.user);
 
     if (req.user && req.user.role && req.user.role.toLowerCase() === 'admin') {
       // Permitir sin límite para admin (insensible a mayúsculas)
