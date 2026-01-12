@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { AdminBypassThrottlerGuard } from './common/guards/admin-bypass-throttler.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PropertyModule } from './modules/property/property.module';
@@ -60,7 +61,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: AdminBypassThrottlerGuard,
     },
   ],
 })
