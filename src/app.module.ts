@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, Reflector } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { AdminBypassThrottlerGuard } from './common/guards/admin-bypass-throttler.guard';
 import { AppController } from './app.controller';
@@ -60,6 +60,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
   controllers: [AppController],
   providers: [
     AppService,
+    Reflector,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
