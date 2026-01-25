@@ -149,10 +149,10 @@ export class PropertyService {
     console.log('PATCH property - datos recibidos desde frontend:', updatePropertyDto);
     console.log('PATCH property - id:', id);
 
-    // Obtener la propiedad actual para comparar el título
+
     const current = await this.propertyRepository.findOne({ where: { id } });
     if (updatePropertyDto.title && updatePropertyDto.title !== current?.title) {
-      // Regenerar slug si el título cambió
+
       updateData.slug = updatePropertyDto.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
