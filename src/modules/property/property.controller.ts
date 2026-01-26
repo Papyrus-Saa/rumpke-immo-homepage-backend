@@ -14,11 +14,12 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { SearchPropertyDto } from './dto/search-property.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../../common/decorators/public.decorator';
 
-@UseGuards(JwtAuthGuard)
 @Controller('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) { }
+
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -26,16 +27,19 @@ export class PropertyController {
     return this.propertyService.create(createPropertyDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.propertyService.findAll();
   }
 
+  @Public()
   @Get('search')
   search(@Query() searchDto: SearchPropertyDto) {
     return this.propertyService.search(searchDto);
   }
 
+  @Public()
   @Get('nearby')
   findNearby(
     @Query('lat') lat: string,
@@ -49,6 +53,7 @@ export class PropertyController {
     );
   }
 
+  @Public()
   @Get('map')
   findInBounds(
     @Query('north') north: string,
@@ -64,6 +69,7 @@ export class PropertyController {
     });
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.propertyService.findOne(id);
