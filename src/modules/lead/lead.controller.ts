@@ -22,13 +22,13 @@ import { LeadStatus, LeadType } from './entities/lead.entity';
 export class LeadController {
   constructor(private readonly leadService: LeadService) { }
 
+  // Solo throttling en el POST (crear lead)
   @Throttle({ default: { ttl: 60000, limit: 3 } })
   @Post()
   create(@Body() createLeadDto: CreateLeadDto) {
     return this.leadService.create(createLeadDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(
     @Query('status') status?: LeadStatus,
@@ -38,25 +38,21 @@ export class LeadController {
     return this.leadService.findAll(status, type, propertyId);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('stats')
   getStats() {
     return this.leadService.getStats();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.leadService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateLeadDto: UpdateLeadDto) {
     return this.leadService.update(id, updateLeadDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.leadService.remove(id);
